@@ -1,0 +1,77 @@
+name: CI/CD Pipeline
+
+on: 
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    name: CI (Lint, Test, Build)
+    runs-on: ubuntu_latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 1. Lint HTML
+        run: |
+          npm install -g htmlhint
+          htmlhint *.html
+
+      - name: 2. Test
+        run: |
+          bash tests/validate.sh
+
+      - name: 3. Build (Zip files)
+        run: |
+          zip -r release-artifact.zip index.html style.css config.json tests/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-artifact
+          path: release-artifact.zip
+
+  deploy-staging:
+    name: Deploy Staging
+    needs: ci
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-artifact
+
+      - name: Simulate Staging Deployment
+        run: |
+          echo "Starting deployment to Staginr..."
+          echo "Extracting app files..."
+          ls -la
+          echo "Simulated Staging Deployment Successful!"
+
+  deploy-production:
+    name: Deploy Production
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-artifact
+
+      - name: Simulate Production Deployment
+        run: |
+          echo "Starting deployment to Production..."
+          echo "Extracting app files..."
+          ls -la
+          echo "Simulated Production Deployment successful!"
+
+      
+    
+
+    
