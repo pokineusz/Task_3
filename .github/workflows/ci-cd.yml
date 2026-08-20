@@ -47,7 +47,7 @@ jobs:
 
       - name: Simulate Staging Deployment
         run: |
-          echo "Starting deployment to Staginr..."
+          echo "Starting deployment to Staging..."
           echo "Extracting app files..."
           ls -la
           echo "Simulated Staging Deployment Successful!"
